@@ -14,3 +14,279 @@ CORS allowed origin(s): https://blog-frontned-delta.vercel.app
 Connected to MongoDB successfully
 ✅ Gmail transporter ready (t***@gmail.com)
 oDB successfully
+Total blogs in DB: 0, Published: 0
+Found 0 published blogs
+Total blogs in DB: 0, Published: 0
+Found 0 published blogs
+Error sending login email: TypeError: Cannot read properties of undefined (reading 'sendMail')
+    at exports.sendLoginEmail (/home/thamaraikannan/Desktop/fb/backend/services/emailService.js:69:23)
+    at exports.loginUser (/home/thamaraikannan/Desktop/fb/backend/controllers/userController.js:136:24)
+🔐 Auth Middleware Debug:
+  Cookies: [Object: null prototype] {}
+  Authorization header: ✗ Missing
+  Token extracted: ✗ No
+❌ No token found in cookies or headers
+Total blogs in DB: 0, Published: 0
+Found 0 published blogs
+🔐 Auth Middleware Debug:
+  Cookies: [Object: null prototype] {}
+  Authorization header: ✗ Missing
+  Token extracted: ✗ No
+❌ No token found in cookies or headers
+🔐 Auth Middleware Debug:
+  Cookies: [Object: null prototype] {}
+  Authorization header: ✗ Missing
+  Token extracted: ✗ No
+❌ No token found in cookies or headers
+🔐 Auth Middleware Debug:
+  Cookies: [Object: null prototype] {}
+  Authorization header: ✗ Missing
+  Token extracted: ✗ No
+❌ No token found in cookies or headers
+Error sending registration email: TypeError: Cannot read properties of undefined (reading 'sendMail')
+    at exports.sendRegistrationEmail (/home/thamaraikannan/Desktop/fb/backend/services/emailService.js:33:23)
+    at exports.createUser (/home/thamaraikannan/Desktop/fb/backend/controllers/userController.js:60:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error sending login email: TypeError: Cannot read properties of undefined (reading 'sendMail')
+    at exports.sendLoginEmail (/home/thamaraikannan/Desktop/fb/backend/services/emailService.js:69:23)
+    at exports.loginUser (/home/thamaraikannan/Desktop/fb/backend/controllers/userController.js:136:24)
+🔐 Auth Middleware Debug:
+  Cookies: {
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NDJkZmQ3NmExMWRmZDlkNjYxYmI5ZiIsImVtYWlsIjoidGVzdHVzZXIrbG9jYWxAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjU5OTAzNjEsImV4cCI6MTc2NjU5NTE2MX0.A-3Ys5ce4Xs0gNWp5-rmE0UCBIsHUm4Z2YrxIbVUYmU'
+}
+  Authorization header: ✗ Missing
+  Token extracted: ✓ Yes
+  JWT Secret used: ✓ Found
+  Token decoded successfully
+  Decoded user ID: 6942dfd76a11dfd9d661bb9f
+  req.user set: { id: '6942dfd76a11dfd9d661bb9f', email: 'testuser+local@example.com' }
+🔐 Auth Middleware Debug:
+  Cookies: [Object: null prototype] {}
+  Authorization header: ✓ Present
+  Token extracted: ✓ Yes
+  JWT Secret used: ✓ Found
+  Token decoded successfully
+  Decoded user ID: 6942dfd76a11dfd9d661bb9f
+  req.user set: { id: '6942dfd76a11dfd9d661bb9f', email: 'testuser+local@example.com' }
+🔐 Auth Middleware Debug:
+  Cookies: {
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NDJkZmQ3NmExMWRmZDlkNjYxYmI5ZiIsImVtYWlsIjoidGVzdHVzZXIrbG9jYWxAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjU5OTAzNjEsImV4cCI6MTc2NjU5NTE2MX0.A-3Ys5ce4Xs0gNWp5-rmE0UCBIsHUm4Z2YrxIbVUYmU'
+}
+  Authorization header: ✗ Missing
+  Token extracted: ✓ Yes
+  JWT Secret used: ✓ Found
+  Token decoded successfully
+  Decoded user ID: 6942dfd76a11dfd9d661bb9f
+  req.user set: { id: '6942dfd76a11dfd9d661bb9f', email: 'testuser+local@example.com' }
+📝 Create Blog Request:
+  Title: Test post from cookie
+  Content: Hello from cookie test...
+  Emoji: undefined
+  AuthorId: 6942dfd76a11dfd9d661bb9f
+  Tags (raw): [ 'smoke' ]
+  Tags (type): object
+  Tags (final): [ 'smoke' ]
+💾 Saving blog to database...
+✅ Blog saved with ID: new ObjectId('6942dfdb6a11dfd9d661bba4')
+👤 Author populated: Local Tester
+📤 Sending success response
+Error sending like notification: userId is not defined
+📡 Broadcasting event: blog:created
+🔐 Auth Middleware Debug:
+  Cookies: [Object: null prototype] {}
+  Authorization header: ✓ Present
+  Token extracted: ✓ Yes
+  JWT Secret used: ✓ Found
+  Token decoded successfully
+  Decoded user ID: 6942dfd76a11dfd9d661bb9f
+  req.user set: { id: '6942dfd76a11dfd9d661bb9f', email: 'testuser+local@example.com' }
+📝 Create Blog Request:
+  Title: Test post from header
+  Content: Hello from header test...
+  Emoji: undefined
+  AuthorId: 6942dfd76a11dfd9d661bb9f
+  Tags (raw): [ 'smoke' ]
+  Tags (type): object
+  Tags (final): [ 'smoke' ]
+💾 Saving blog to database...
+✅ Blog saved with ID: new ObjectId('6942dfdb6a11dfd9d661bba7')
+👤 Author populated: Local Tester
+📤 Sending success response
+Error sending like notification: userId is not defined
+📡 Broadcasting event: blog:created
+🔐 Auth Middleware Debug:
+  Cookies: {
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NDJkZmQ3NmExMWRmZDlkNjYxYmI5ZiIsImVtYWlsIjoidGVzdHVzZXIrbG9jYWxAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjU5OTAzNjEsImV4cCI6MTc2NjU5NTE2MX0.A-3Ys5ce4Xs0gNWp5-rmE0UCBIsHUm4Z2YrxIbVUYmU'
+}
+  Authorization header: ✗ Missing
+  Token extracted: ✓ Yes
+  JWT Secret used: ✓ Found
+  Token decoded successfully
+  Decoded user ID: 6942dfd76a11dfd9d661bb9f
+  req.user set: { id: '6942dfd76a11dfd9d661bb9f', email: 'testuser+local@example.com' }
+🔐 Auth Middleware Debug:
+  Cookies: [Object: null prototype] {}
+  Authorization header: ✓ Present
+  Token extracted: ✓ Yes
+  JWT Secret used: ✓ Found
+  Token decoded successfully
+  Decoded user ID: 6942dfd76a11dfd9d661bb9f
+  req.user set: { id: '6942dfd76a11dfd9d661bb9f', email: 'testuser+local@example.com' }
+🔐 Auth Middleware Debug:
+  Cookies: {
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NDJkZmQ3NmExMWRmZDlkNjYxYmI5ZiIsImVtYWlsIjoidGVzdHVzZXIrbG9jYWxAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjU5OTAzNjEsImV4cCI6MTc2NjU5NTE2MX0.A-3Ys5ce4Xs0gNWp5-rmE0UCBIsHUm4Z2YrxIbVUYmU'
+}
+  Authorization header: ✗ Missing
+  Token extracted: ✓ Yes
+  JWT Secret used: ✓ Found
+  Token decoded successfully
+  Decoded user ID: 6942dfd76a11dfd9d661bb9f
+  req.user set: { id: '6942dfd76a11dfd9d661bb9f', email: 'testuser+local@example.com' }
+📝 Create Blog Request:
+  Title: Test post from cookie
+  Content: Hello from cookie test...
+  Emoji: undefined
+  AuthorId: 6942dfd76a11dfd9d661bb9f
+  Tags (raw): [ 'smoke' ]
+  Tags (type): object
+  Tags (final): [ 'smoke' ]
+💾 Saving blog to database...
+✅ Blog saved with ID: new ObjectId('6942e01c6a11dfd9d661bbac')
+👤 Author populated: Local Tester
+📤 Sending success response
+Error sending like notification: userId is not defined
+📡 Broadcasting event: blog:created
+🔐 Auth Middleware Debug:
+  Cookies: [Object: null prototype] {}
+  Authorization header: ✓ Present
+  Token extracted: ✓ Yes
+  JWT Secret used: ✓ Found
+  Token decoded successfully
+  Decoded user ID: 6942dfd76a11dfd9d661bb9f
+  req.user set: { id: '6942dfd76a11dfd9d661bb9f', email: 'testuser+local@example.com' }
+📝 Create Blog Request:
+  Title: Test post from header
+  Content: Hello from header test...
+  Emoji: undefined
+  AuthorId: 6942dfd76a11dfd9d661bb9f
+  Tags (raw): [ 'smoke' ]
+  Tags (type): object
+  Tags (final): [ 'smoke' ]
+💾 Saving blog to database...
+✅ Blog saved with ID: new ObjectId('6942e02a6a11dfd9d661bbaf')
+👤 Author populated: Local Tester
+📤 Sending success response
+Error sending like notification: userId is not defined
+📡 Broadcasting event: blog:created
+🔐 Auth Middleware Debug:
+  Cookies: {
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NDJkZmQ3NmExMWRmZDlkNjYxYmI5ZiIsImVtYWlsIjoidGVzdHVzZXIrbG9jYWxAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjU5OTAzNjEsImV4cCI6MTc2NjU5NTE2MX0.A-3Ys5ce4Xs0gNWp5-rmE0UCBIsHUm4Z2YrxIbVUYmU'
+}
+  Authorization header: ✗ Missing
+  Token extracted: ✓ Yes
+  JWT Secret used: ✓ Found
+  Token decoded successfully
+  Decoded user ID: 6942dfd76a11dfd9d661bb9f
+  req.user set: { id: '6942dfd76a11dfd9d661bb9f', email: 'testuser+local@example.com' }
+📝 Create Blog Request:
+  Title: Cross-origin cookie test
+  Content: Cookie test...
+  Emoji: undefined
+  AuthorId: 6942dfd76a11dfd9d661bb9f
+  Tags (raw): [ 'cors' ]
+  Tags (type): object
+  Tags (final): [ 'cors' ]
+💾 Saving blog to database...
+✅ Blog saved with ID: new ObjectId('6942e0d66a11dfd9d661bbb2')
+👤 Author populated: Local Tester
+📤 Sending success response
+Error sending like notification: userId is not defined
+📡 Broadcasting event: blog:created
+🔐 Auth Middleware Debug:
+  Cookies: {
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NDJkZmQ3NmExMWRmZDlkNjYxYmI5ZiIsImVtYWlsIjoidGVzdHVzZXIrbG9jYWxAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjU5OTAzNjEsImV4cCI6MTc2NjU5NTE2MX0.A-3Ys5ce4Xs0gNWp5-rmE0UCBIsHUm4Z2YrxIbVUYmU'
+}
+  Authorization header: ✗ Missing
+  Token extracted: ✓ Yes
+  JWT Secret used: ✓ Found
+  Token decoded successfully
+  Decoded user ID: 6942dfd76a11dfd9d661bb9f
+  req.user set: { id: '6942dfd76a11dfd9d661bb9f', email: 'testuser+local@example.com' }
+🔐 Auth Middleware Debug:
+  Cookies: [Object: null prototype] {}
+  Authorization header: ✓ Present
+  Token extracted: ✓ Yes
+  JWT Secret used: ✓ Found
+  Token decoded successfully
+  Decoded user ID: 6942dfd76a11dfd9d661bb9f
+  req.user set: { id: '6942dfd76a11dfd9d661bb9f', email: 'testuser+local@example.com' }
+📝 Create Blog Request:
+  Title: Cross-origin header test
+  Content: Header test...
+  Emoji: undefined
+  AuthorId: 6942dfd76a11dfd9d661bb9f
+  Tags (raw): [ 'cors' ]
+  Tags (type): object
+  Tags (final): [ 'cors' ]
+💾 Saving blog to database...
+✅ Blog saved with ID: new ObjectId('6942e0d76a11dfd9d661bbb6')
+👤 Author populated: Local Tester
+📤 Sending success response
+Error sending like notification: userId is not defined
+📡 Broadcasting event: blog:created
+🔐 Auth Middleware Debug:
+  Cookies: {
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NDJkZmQ3NmExMWRmZDlkNjYxYmI5ZiIsImVtYWlsIjoidGVzdHVzZXIrbG9jYWxAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjU5OTAzNjEsImV4cCI6MTc2NjU5NTE2MX0.A-3Ys5ce4Xs0gNWp5-rmE0UCBIsHUm4Z2YrxIbVUYmU'
+}
+  Authorization header: ✗ Missing
+  Token extracted: ✓ Yes
+  JWT Secret used: ✓ Found
+  Token decoded successfully
+  Decoded user ID: 6942dfd76a11dfd9d661bb9f
+  req.user set: { id: '6942dfd76a11dfd9d661bb9f', email: 'testuser+local@example.com' }
+📝 Create Blog Request:
+  Title: Cross-origin cookie test
+  Content: Cookie test...
+  Emoji: undefined
+  AuthorId: 6942dfd76a11dfd9d661bb9f
+  Tags (raw): [ 'cors' ]
+  Tags (type): object
+  Tags (final): [ 'cors' ]
+💾 Saving blog to database...
+✅ Blog saved with ID: new ObjectId('6942e1446a11dfd9d661bbb9')
+👤 Author populated: Local Tester
+📤 Sending success response
+Error sending like notification: userId is not defined
+📡 Broadcasting event: blog:created
+🔐 Auth Middleware Debug:
+  Cookies: {
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NDJkZmQ3NmExMWRmZDlkNjYxYmI5ZiIsImVtYWlsIjoidGVzdHVzZXIrbG9jYWxAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjU5OTAzNjEsImV4cCI6MTc2NjU5NTE2MX0.A-3Ys5ce4Xs0gNWp5-rmE0UCBIsHUm4Z2YrxIbVUYmU'
+}
+  Authorization header: ✗ Missing
+  Token extracted: ✓ Yes
+  JWT Secret used: ✓ Found
+  Token decoded successfully
+  Decoded user ID: 6942dfd76a11dfd9d661bb9f
+  req.user set: { id: '6942dfd76a11dfd9d661bb9f', email: 'testuser+local@example.com' }
+🔐 Auth Middleware Debug:
+  Cookies: [Object: null prototype] {}
+  Authorization header: ✓ Present
+  Token extracted: ✓ Yes
+  JWT Secret used: ✓ Found
+  Token decoded successfully
+  Decoded user ID: 6942dfd76a11dfd9d661bb9f
+  req.user set: { id: '6942dfd76a11dfd9d661bb9f', email: 'testuser+local@example.com' }
+📝 Create Blog Request:
+  Title: Cross-origin header test
+  Content: Header test...
+  Emoji: undefined
+  AuthorId: 6942dfd76a11dfd9d661bb9f
+  Tags (raw): [ 'cors' ]
+  Tags (type): object
+  Tags (final): [ 'cors' ]
+💾 Saving blog to database...
+✅ Blog saved with ID: new ObjectId('6942e1706a11dfd9d661bbbd')
+👤 Author populated: Local Tester
+📤 Sending success response
+Error sending like notification: userId is not defined
+📡 Broadcasting event: blog:created
