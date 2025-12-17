@@ -17,10 +17,14 @@ const chatRoutes = require('./routes/chatRoutes');
 const app = express();
 
 // Middleware
-// Allow configuring CORS via CORS_ORIGIN or FRONTEND_URL (fallback to Vite dev default 5173)
-const CORS_ALLOWED_ORIGIN = process.env.CORS_ORIGIN || process.env.FRONTEND_URL || 'http://localhost:8080';
+// Allow configuring CORS via CORS_ORIGIN or FRONTEND_URL (fallback to localhost 8080)
+// Support comma-separated values so multiple frontend origins can be allowed.
+const rawCors = process.env.CORS_ORIGIN || process.env.FRONTEND_URL || 'http://localhost:8080';
+const corsList = rawCors.split(',').map(s => s.trim()).filter(Boolean);
+const CORS_ALLOWED_ORIGINS = corsList.length > 1 ? corsList : corsList[0];
+
 app.use(cors({
-  origin: CORS_ALLOWED_ORIGIN,
+  origin: CORS_ALLOWED_ORIGINS,
   credentials: true,
 }));
 app.use(express.json({ limit: '50mb' }));
@@ -216,7 +220,7 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-  console.log(`CORS allowed origin: ${CORS_ALLOWED_ORIGIN}`);
+  console.log(`CORS allowed origin(s): ${Array.isArray(CORS_ALLOWED_ORIGINS) ? CORS_ALLOWED_ORIGINS.join(', ') : CORS_ALLOWED_ORIGINS}`);
   console.log(`📡 Real-time events endpoint: http://localhost:${PORT}/api/events/stream`);
 });
 

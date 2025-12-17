@@ -18,14 +18,15 @@ This file explains common causes of "No token provided" when creating/publishing
 ### If your frontend is hosted at https://chronicle-flowgeg.vercel.app
 
 - Set `FRONTEND_URL` (or `CORS_ORIGIN`) in your API `.env` to `https://chronicle-flowgeg.vercel.app` so the server's CORS config allows requests from that origin.
+- Set `FRONTEND_URL` (or `CORS_ORIGIN`) in your API `.env` to `https://chronicle-flowgeg.vercel.app` or `https://blog-frontned-delta.vercel.app` so the server's CORS config allows requests from that origin.
 - In production set `NODE_ENV=production` (already required) and ensure cookies use `SameSite=None` and `Secure` so cross-site cookies can be sent. You can override via an env var:
    - `COOKIE_SAMESITE=None` (optional override)
 
 Example `.env` additions:
 
 ```
-FRONTEND_URL=https://chronicle-flowgeg.vercel.app
-CORS_ORIGIN=https://chronicle-flowgeg.vercel.app
+FRONTEND_URL=https://blog-frontned-delta.vercel.app
+CORS_ORIGIN=https://blog-frontned-delta.vercel.app
 COOKIE_SAMESITE=None
 NODE_ENV=production
 ```

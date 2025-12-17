@@ -3,13 +3,14 @@ nohup: ignoring input
 > fb@1.0.0 start
 > node server.js
 
-[dotenv@17.2.3] injecting env (14) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
-[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+[dotenv@17.2.3] injecting env (14) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
 ⚠️  GMAIL_PASSWORD contains spaces — ensure you use a 16-character App Password without spaces.
 ℹ️  Attempting Gmail transport for t***@gmail.com
 Debug routes enabled at /api/debug/*
 Server is running on port 5000
-CORS allowed origin: http://localhost:8080
+CORS allowed origin(s): https://blog-frontned-delta.vercel.app
 📡 Real-time events endpoint: http://localhost:5000/api/events/stream
-✅ Gmail transporter ready (t***@gmail.com)
 Connected to MongoDB successfully
+✅ Gmail transporter ready (t***@gmail.com)
+oDB successfully
