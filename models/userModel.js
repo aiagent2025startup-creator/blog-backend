@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
+      unique: true,
       sparse: true,
       lowercase: true,
       match: /.+\@.+\..+/,
@@ -17,21 +18,21 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-      // Password reset fields
-      resetPasswordToken: {
-        type: String,
-        default: null,
-      },
-      resetPasswordExpires: {
-        type: Date,
-        default: null,
-      },
+    // Password reset fields
+    resetPasswordToken: {
+      type: String,
+      default: null,
+    },
+    resetPasswordExpires: {
+      type: Date,
+      default: null,
+    },
     phone: {
       type: String,
       sparse: true,
       trim: true,
       validate: {
-        validator: function(v) {
+        validator: function (v) {
           if (!v) return true; // Phone is optional
           // Accept +91XXXXXXXXXX or 91XXXXXXXXXX or XXXXXXXXXX (10 digits)
           return /^(?:\+91|91)?\d{10}$/.test(v);

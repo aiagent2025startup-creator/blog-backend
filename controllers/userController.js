@@ -107,7 +107,7 @@ exports.loginUser = async (req, res) => {
       console.warn('Failed login: user not found', { email: emailKey, ip });
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password',
+        message: 'Invalid email or password. Please check your credentials or sign up.',
       });
     }
 
@@ -315,7 +315,7 @@ exports.clearAllUsers = async (req, res) => {
 exports.searchUsers = async (req, res) => {
   try {
     const { search } = req.query;
-    
+
     if (!search || search.trim() === '') {
       return res.status(400).json({
         success: false,
@@ -347,7 +347,7 @@ exports.searchUsers = async (req, res) => {
 exports.getAllUsersEmails = async (req, res) => {
   try {
     const users = await User.find().select('email name');
-    
+
     const emails = users.map(user => ({
       id: user._id,
       name: user.name,
