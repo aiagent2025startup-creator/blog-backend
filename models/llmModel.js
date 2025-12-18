@@ -13,8 +13,8 @@ const llmSchema = new mongoose.Schema(
     },
     model: {
       type: String,
-      default: 'gemini-pro',
-      enum: ['gpt-3.5-turbo', 'gpt-4', 'claude', 'gemini-pro', 'other'],
+      default: 'gemini-1.5-flash',
+      enum: ['gpt-3.5-turbo', 'gpt-4', 'claude', 'gemini-pro', 'gemini-1.5-flash', 'other'],
     },
     tokens: {
       inputTokens: {
