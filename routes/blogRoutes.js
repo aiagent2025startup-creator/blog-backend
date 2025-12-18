@@ -12,7 +12,7 @@ router.get('/debug/all-blogs', async (req, res) => {
     const blogs = await Blog.find().populate('author', 'name email avatar');
     const count = await Blog.countDocuments();
     const publishedCount = await Blog.countDocuments({ isPublished: true });
-    
+
     res.json({
       totalBlogs: count,
       publishedBlogs: publishedCount,
@@ -24,10 +24,10 @@ router.get('/debug/all-blogs', async (req, res) => {
 });
 
 // Blog CRUD routes
-router.post('/create', auth, upload.single('image'), blogController.createBlog);
+router.post('/create', auth, upload.single('media'), blogController.createBlog);
 router.get('/all', blogController.getAllBlogs);
 router.get('/:id', blogController.getBlogById);
-router.put('/update/:id', auth, upload.single('image'), blogController.updateBlog);
+router.put('/update/:id', auth, upload.single('media'), blogController.updateBlog);
 router.delete('/delete/:id', auth, blogController.deleteBlog);
 
 // Like routes

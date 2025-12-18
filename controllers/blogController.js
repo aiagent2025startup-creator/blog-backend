@@ -26,7 +26,7 @@ exports.createBlog = async (req, res) => {
         tags = tags ? [tags] : [];
       }
     }
-    
+
     // Ensure tags is an array
     if (!Array.isArray(tags)) {
       tags = tags ? [tags] : [];
@@ -46,11 +46,20 @@ exports.createBlog = async (req, res) => {
     }
 
     let imageUrl = null;
+    let videoUrl = null;
+    let type = req.body.type || 'blog';
 
-    // Upload image if provided
+    // Upload media if provided
     if (req.file) {
-      imageUrl = req.file.path;
-      console.log('📸 Image uploaded:', imageUrl);
+      const isVideo = req.file.mimetype.startsWith('video/');
+      if (isVideo) {
+        videoUrl = req.file.path;
+        type = 'short';
+        console.log('🎥 Video uploaded:', videoUrl);
+      } else {
+        imageUrl = req.file.path;
+        console.log('📸 Image uploaded:', imageUrl);
+      }
     }
 
     // Create new blog - set isPublished to true by default
@@ -58,6 +67,8 @@ exports.createBlog = async (req, res) => {
       title,
       content,
       image: imageUrl,
+      videoUrl: videoUrl,
+      type: type,
       emoji,
       author: authorId,
       tags: Array.isArray(tags) ? tags : [],
@@ -80,42 +91,42 @@ exports.createBlog = async (req, res) => {
     });
 
 
-              // Persist and emit a user notification for the blog author
-              try {
-                const blogAuthorId = blog.author ? blog.author.toString() : null;
-                if (blogAuthorId && blogAuthorId !== userId) {
-                  // Create notification in DB if model available
-                  try {
-                    const Notification = require('../models/notificationModel');
-                    const actorUser = await require('../models/userModel').findById(userId).select('name avatar');
-                    await Notification.create({
-                      recipient: blogAuthorId,
-                      type: 'like',
-                      message: `${actorUser?.name || 'Someone'} liked your blog`,
-                      actor: {
-                        id: actorUser?._id,
-                        name: actorUser?.name,
-                        avatar: actorUser?.avatar,
-                      },
-                      targetBlog: { id: blog._id.toString(), title: blog.title },
-                    });
-                  } catch (e) {
-                    console.error('Failed to persist like notification:', e && e.message ? e.message : e);
-                  }
+    // Persist and emit a user notification for the blog author
+    try {
+      const blogAuthorId = blog.author ? blog.author.toString() : null;
+      if (blogAuthorId && blogAuthorId !== userId) {
+        // Create notification in DB if model available
+        try {
+          const Notification = require('../models/notificationModel');
+          const actorUser = await require('../models/userModel').findById(userId).select('name avatar');
+          await Notification.create({
+            recipient: blogAuthorId,
+            type: 'like',
+            message: `${actorUser?.name || 'Someone'} liked your blog`,
+            actor: {
+              id: actorUser?._id,
+              name: actorUser?.name,
+              avatar: actorUser?.avatar,
+            },
+            targetBlog: { id: blog._id.toString(), title: blog.title },
+          });
+        } catch (e) {
+          console.error('Failed to persist like notification:', e && e.message ? e.message : e);
+        }
 
-                  // Emit real-time notification event targeted to the author
-                  global.broadcastEvent('notification:new', {
-                    type: 'like',
-                    message: 'Someone liked your blog',
-                    actor: { id: userId },
-                    targetBlog: { id: blog._id.toString(), title: blog.title },
-                    recipientId: blogAuthorId,
-                    timestamp: new Date().toISOString(),
-                  });
-                }
-              } catch (e) {
-                console.error('Error sending like notification:', e && e.message ? e.message : e);
-              }
+        // Emit real-time notification event targeted to the author
+        global.broadcastEvent('notification:new', {
+          type: 'like',
+          message: 'Someone liked your blog',
+          actor: { id: userId },
+          targetBlog: { id: blog._id.toString(), title: blog.title },
+          recipientId: blogAuthorId,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    } catch (e) {
+      console.error('Error sending like notification:', e && e.message ? e.message : e);
+    }
     // Broadcast real-time event
     if (global.broadcastEvent) {
       global.broadcastEvent('blog:created', {
@@ -147,9 +158,9 @@ exports.getAllBlogs = async (req, res) => {
     // First check if there are any blogs at all
     const totalBlogs = await Blog.countDocuments();
     const publishedBlogs = await Blog.countDocuments({ isPublished: true });
-    
+
     console.log(`Total blogs in DB: ${totalBlogs}, Published: ${publishedBlogs}`);
-    
+
     const blogs = await Blog.find({ isPublished: true })
       .populate('author', 'name email avatar')
       .populate('likes', 'name email')
@@ -179,7 +190,9 @@ exports.getAllBlogs = async (req, res) => {
         title: blog.title,
         content: blog.content,
         emoji: blog.emoji || '📝',
-        coverImage: blog.image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&h=400&fit=crop',
+        coverImage: blog.image || (blog.type === 'short' ? null : 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&h=400&fit=crop'),
+        videoUrl: blog.videoUrl,
+        type: blog.type || 'blog',
         tags: blog.tags || [],
         authorId: authorId,
         author: {
@@ -471,7 +484,7 @@ exports.addComment = async (req, res) => {
         text: newComment.text,
         createdAt: new Date().toISOString(),
       });
-    
+
       try {
         // Send a notification event to the blog author (unless they commented themself)
         const blogAuthorId = blog.author ? blog.author.toString() : null;

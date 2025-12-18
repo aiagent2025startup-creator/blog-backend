@@ -37,6 +37,15 @@ const blogSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    videoUrl: {
+      type: String,
+      trim: true,
+    },
+    type: {
+      type: String,
+      enum: ['blog', 'short'],
+      default: 'blog',
+    },
     emoji: {
       type: String,
       trim: true,
