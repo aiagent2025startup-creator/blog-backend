@@ -53,7 +53,7 @@ exports.generateContent = async (req, res) => {
       temperature: temperature || 0.7,
       maxTokens: maxTokens || 2000,
       generatedContent,
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.0-flash',
       tokens: {
         inputTokens,
         outputTokens,
