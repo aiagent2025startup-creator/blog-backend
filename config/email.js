@@ -14,7 +14,9 @@ const mockTransporter = {
   verify: (callback) => callback(null, true),
 };
 
-let transporter;
+// Default to mock transporter so callers can safely call sendMail even before
+// a real transporter is initialized asynchronously.
+let transporter = mockTransporter;
 
 function maskEmail(email) {
   if (!email || typeof email !== 'string') return '(none)';
@@ -93,9 +95,8 @@ async function tryVerifyTransport(trans) {
     }
   }
 
-  // Default fallback: mock transporter
+  // Default fallback: keep using mock transporter (already assigned above)
   console.log('ℹ️  Using mock email service. To enable real email: set SMTP_* or GMAIL_USER/GMAIL_PASSWORD in env');
-  transporter = mockTransporter;
 })();
 
 module.exports = transporter;

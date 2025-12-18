@@ -19,14 +19,27 @@ const app = express();
 // Middleware
 // Allow configuring CORS via CORS_ORIGIN or FRONTEND_URL (fallback to localhost 8080)
 // Support comma-separated values so multiple frontend origins can be allowed.
-const rawCors = process.env.CORS_ORIGIN || process.env.FRONTEND_URL || 'http://localhost:8080';
-const corsList = rawCors.split(',').map(s => s.trim()).filter(Boolean);
-const CORS_ALLOWED_ORIGINS = corsList.length > 1 ? corsList : corsList[0];
+// CORS_ORIGIN may be a comma-separated list. Normalize by trimming and removing trailing slashes.
+const rawOrigins = (process.env.CORS_ORIGIN || process.env.FRONTEND_URL || 'http://localhost:8080');
+const ALLOWED_ORIGINS = rawOrigins.split(',').map(s => s.trim().replace(/\/$/, '')).filter(Boolean);
 
+// Use a dynamic origin checker to avoid subtle mismatches (e.g., trailing slash).
 app.use(cors({
-  origin: CORS_ALLOWED_ORIGINS,
+  origin: function (origin, callback) {
+    // Allow non-browser requests (e.g., curl, server-to-server) which send no origin
+    if (!origin) return callback(null, true);
+    const sanitized = origin.replace(/\/$/, '');
+    if (ALLOWED_ORIGINS.includes(sanitized)) return callback(null, true);
+    console.warn(`Blocked CORS request from origin: ${origin}. Allowed: ${ALLOWED_ORIGINS.join(', ')}`);
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
 }));
+
+// NOTE: previous code used a static `CORS_ALLOWED_ORIGINS` variable which is
+// now replaced by `ALLOWED_ORIGINS` and a dynamic origin checker above.
+// The following static cors() call was removed to avoid a ReferenceError when
+// older env vars exist or the variable is not defined.
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(cookieParser());
@@ -58,6 +71,10 @@ function broadcastEvent(eventType, data) {
 
 // Make broadcastEvent globally available
 global.broadcastEvent = broadcastEvent;
+
+// Optional public realtime endpoint URL (e.g., deployed URL on Render/Vercel)
+// Set REALTIME_PUBLIC_URL to your deployed API (for example: https://blog-backend-e4j1.onrender.com)
+const REALTIME_PUBLIC_URL = process.env.REALTIME_PUBLIC_URL || process.env.PUBLIC_API_URL || '';
 
 // MongoDB Connection
 // Prefer `MONGODB_URI` (common name) but accept `MONGO_URI` for compatibility
@@ -111,7 +128,14 @@ app.get('/api/events/stream', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
-  res.setHeader('Access-Control-Allow-Origin', CORS_ALLOWED_ORIGIN);
+  // For SSE connections we must echo back the request's origin when it's allowed.
+  const reqOrigin = (req.headers.origin || '').replace(/\/$/, '');
+  if (ALLOWED_ORIGINS.includes(reqOrigin)) {
+    res.setHeader('Access-Control-Allow-Origin', reqOrigin);
+  } else {
+    // Fallback to first allowed origin (safe default) — this avoids accidental trailing slash mismatches
+    res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGINS[0]);
+  }
   res.setHeader('Access-Control-Allow-Credentials', 'true');
 
   // Send initial connection message
@@ -146,8 +170,13 @@ app.get('/api/events/stream', (req, res) => {
 
 // Basic route
 app.get('/', (req, res) => {
-  res.json({ message: 'Server is running', realtimeClients: clients.size });
+  const local = `http://localhost:${process.env.PORT || 5000}/api/events/stream`;
+  const publicUrl = REALTIME_PUBLIC_URL ? `${REALTIME_PUBLIC_URL.replace(/\/$/, '')}/api/events/stream` : null;
+  res.json({ message: 'Server is running', realtimeClients: clients.size, events: { local, public: publicUrl } });
 });
+
+// Quick top-level ping for debugging
+app.get('/__debug/ping', (req, res) => res.json({ success: true, msg: 'pong' }));
 
 // DEV: quick endpoint to test email delivery without creating a user
 if (process.env.NODE_ENV === 'development') {
@@ -168,6 +197,16 @@ if (process.env.NODE_ENV === 'development') {
 // Debug route to inspect masked env values (enabled in dev or when ALLOW_DEBUG=true)
 const ALLOW_DEBUG = process.env.ALLOW_DEBUG === 'true' || process.env.NODE_ENV !== 'production';
 if (ALLOW_DEBUG) {
+  // Helper to mask sensitive parts of a MongoDB URI for safe debug display
+  function maskMongoURI(uri) {
+    if (!uri || typeof uri !== 'string') return '(none)';
+    try {
+      // Replace credentials and long query params
+      return uri.replace(/:\/\/.*@/, '://***:***@').replace(/([?&]authSource=[^&]*)/i, '***').slice(0, 120) + (uri.length > 120 ? '...' : '');
+    } catch (e) {
+      return '(masked)';
+    }
+  }
   app.get('/__debug/env', (req, res) => {
     try {
       const maskedMongo = maskMongoURI(mongoURI || process.env.MONGODB_URI || process.env.MONGO_URI || '(none)');
@@ -176,12 +215,27 @@ if (ALLOW_DEBUG) {
         nodeEnv: process.env.NODE_ENV || 'not-set',
         mongoHost: maskedMongo,
         mailConfigured,
+        allowedCorsOrigins: ALLOWED_ORIGINS,
+        realtimePublicUrl: REALTIME_PUBLIC_URL || null,
       });
     } catch (err) {
       res.status(500).json({ error: 'Failed to read environment', message: err.message });
     }
   });
+
+  // Quick test endpoint to validate mask helper
+  app.get('/__debug/mask-test', (req, res) => {
+    try {
+      const sample = 'mongodb://user:pass@cluster.example.net/dbname?authSource=admin';
+      res.json({ sample, masked: maskMongoURI(sample) });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
 }
+
+// Log allowed origins on startup for easier debugging
+console.log('Allowed CORS origins:', ALLOWED_ORIGINS.join(', '));
 
 // Health check route
 app.get('/health', (req, res) => {
@@ -220,8 +274,15 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-  console.log(`CORS allowed origin(s): ${Array.isArray(CORS_ALLOWED_ORIGINS) ? CORS_ALLOWED_ORIGINS.join(', ') : CORS_ALLOWED_ORIGINS}`);
-  console.log(`📡 Real-time events endpoint: http://localhost:${PORT}/api/events/stream`);
+  console.log(`CORS allowed origin(s): ${ALLOWED_ORIGINS.join(', ')}`);
+  const localEvents = `http://localhost:${PORT}/api/events/stream`;
+  if (REALTIME_PUBLIC_URL) {
+    // Trim trailing slash if present
+    const publicEvents = `${REALTIME_PUBLIC_URL.replace(/\/$/, '')}/api/events/stream`;
+    console.log(`📡 Real-time events endpoints: ${localEvents}  ${publicEvents}`);
+  } else {
+    console.log(`📡 Real-time events endpoint: ${localEvents}`);
+  }
 });
 
 module.exports = app;

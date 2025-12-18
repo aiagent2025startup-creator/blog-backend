@@ -87,4 +87,36 @@ Workarounds:
    ```
 
 ---
+
+## Real-time events (Server-Sent Events)
+
+This backend supports a Server-Sent Events (SSE) endpoint for real-time notifications at `/api/events/stream`.
+
+- Local dev: http://localhost:5000/api/events/stream
+- Deployed (if configured): set `REALTIME_PUBLIC_URL` to your public API (e.g., `https://blog-backend-e4j1.onrender.com`) and the server will advertise the deployed SSE URL.
+
+Client example (EventSource):
+
+```js
+// Browser
+const es = new EventSource('https://your-api.example.com/api/events/stream', { withCredentials: true });
+es.onmessage = (e) => {
+   const payload = JSON.parse(e.data);
+   console.log('SSE message', payload);
+};
+
+es.onerror = (err) => {
+   console.error('SSE error', err);
+};
+```
+
+Notes:
+- If you use cookies for auth and your SSE connection requires credentials, make sure your EventSource implementation supports sending credentials (some browsers may not send cookies with EventSource by default — in that case use a proxy or a WebSocket fallback).
+- You can inspect the server startup logs or GET `/__debug/env` to confirm the `realtimePublicUrl` the server is advertising.
+
+Example test page included in the repo:
+
+- `examples/frontend-test/index.html` — interactive static page that demonstrates login, cookie/header requests, and SSE subscription. See `examples/frontend-test/README.md` for usage.
+
+---
 If you'd like, I can add an example fetch/axios snippet for your frontend or add a Vite proxy configuration example to this repository. ✅
