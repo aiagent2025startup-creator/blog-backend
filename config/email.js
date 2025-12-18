@@ -37,10 +37,9 @@ async function tryVerifyTransport(trans) {
   }
 }
 
+// Priority: SMTP explicit > GMAIL App Password > mock
 (async () => {
-  // Priority: SMTP explicit > GMAIL App Password > mock
-
-  // 1) If explicit SMTP config present (e.g., SendGrid or custom SMTP)
+  // 1) If explicit SMTP config present
   if (process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS) {
     console.log(`ℹ️  Attempting SMTP transport to ${process.env.SMTP_HOST}`);
     try {
@@ -53,13 +52,16 @@ async function tryVerifyTransport(trans) {
           pass: process.env.SMTP_PASS,
         },
       });
-      const ok = await tryVerifyTransport(smtpTransport);
+      const ok = await Promise.race([
+        tryVerifyTransport(smtpTransport),
+        new Promise(resolve => setTimeout(() => resolve(null), 10000)) // 10s timeout
+      ]);
       if (ok) {
         transporter = smtpTransport;
         console.log(`✅ SMTP transporter ready (${maskEmail(process.env.SMTP_USER)})`);
         return;
       } else {
-        console.warn(`⚠️  SMTP transporter verification failed for ${maskEmail(process.env.SMTP_USER)}.`);
+        console.warn(`⚠️  SMTP transporter verification failed or timed out for ${maskEmail(process.env.SMTP_USER)}.`);
       }
     } catch (e) {
       console.warn('⚠️  SMTP transporter creation failed:', e && e.message ? e.message : e);
@@ -68,7 +70,6 @@ async function tryVerifyTransport(trans) {
 
   // 2) Gmail App Password
   if (process.env.GMAIL_USER && process.env.GMAIL_PASSWORD) {
-    // Common mistake: pasted App Password with spaces. App passwords are 16 chars without spaces.
     if (process.env.GMAIL_PASSWORD.includes(' ')) {
       console.warn('⚠️  GMAIL_PASSWORD contains spaces — ensure you use a 16-character App Password without spaces.');
     }
@@ -81,13 +82,16 @@ async function tryVerifyTransport(trans) {
           pass: process.env.GMAIL_PASSWORD,
         },
       });
-      const ok = await tryVerifyTransport(gmailTransport);
+      const ok = await Promise.race([
+        tryVerifyTransport(gmailTransport),
+        new Promise(resolve => setTimeout(() => resolve(null), 15000)) // 15s timeout for Gmail
+      ]);
       if (ok) {
         transporter = gmailTransport;
         console.log(`✅ Gmail transporter ready (${maskEmail(process.env.GMAIL_USER)})`);
         return;
       } else {
-        console.warn('⚠️  Gmail transporter verification failed. Please confirm the App Password is correct and that 2FA is enabled.');
+        console.warn('⚠️  Gmail transporter verification failed or timed out. Please confirm the App Password is correct and that 2FA is enabled.');
         console.log('   Step: https://myaccount.google.com/apppasswords');
       }
     } catch (error) {
@@ -95,8 +99,12 @@ async function tryVerifyTransport(trans) {
     }
   }
 
-  // Default fallback: keep using mock transporter (already assigned above)
+  // Default fallback: keep using mock transporter
   console.log('ℹ️  Using mock email service. To enable real email: set SMTP_* or GMAIL_USER/GMAIL_PASSWORD in env');
 })();
 
-module.exports = transporter;
+// Export a wrapper that always uses the current transporter instance
+module.exports = {
+  sendMail: (args) => transporter.sendMail(args),
+  verify: (cb) => transporter.verify(cb)
+};

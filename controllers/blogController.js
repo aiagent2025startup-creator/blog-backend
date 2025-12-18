@@ -91,42 +91,7 @@ exports.createBlog = async (req, res) => {
     });
 
 
-    // Persist and emit a user notification for the blog author
-    try {
-      const blogAuthorId = blog.author ? blog.author.toString() : null;
-      if (blogAuthorId && blogAuthorId !== userId) {
-        // Create notification in DB if model available
-        try {
-          const Notification = require('../models/notificationModel');
-          const actorUser = await require('../models/userModel').findById(userId).select('name avatar');
-          await Notification.create({
-            recipient: blogAuthorId,
-            type: 'like',
-            message: `${actorUser?.name || 'Someone'} liked your blog`,
-            actor: {
-              id: actorUser?._id,
-              name: actorUser?.name,
-              avatar: actorUser?.avatar,
-            },
-            targetBlog: { id: blog._id.toString(), title: blog.title },
-          });
-        } catch (e) {
-          console.error('Failed to persist like notification:', e && e.message ? e.message : e);
-        }
 
-        // Emit real-time notification event targeted to the author
-        global.broadcastEvent('notification:new', {
-          type: 'like',
-          message: 'Someone liked your blog',
-          actor: { id: userId },
-          targetBlog: { id: blog._id.toString(), title: blog.title },
-          recipientId: blogAuthorId,
-          timestamp: new Date().toISOString(),
-        });
-      }
-    } catch (e) {
-      console.error('Error sending like notification:', e && e.message ? e.message : e);
-    }
     // Broadcast real-time event
     if (global.broadcastEvent) {
       global.broadcastEvent('blog:created', {
@@ -421,6 +386,47 @@ exports.likeBlog = async (req, res) => {
           likeCount: blog.likes.length,
           action: 'like',
         });
+
+        // Send notification to blog author
+        try {
+          const blogAuthorId = blog.author ? blog.author.toString() : null;
+          if (blogAuthorId && blogAuthorId !== userId) {
+            const actorUser = await User.findById(userId).select('name avatar');
+
+            // Try to persist to DB
+            try {
+              const Notification = require('../models/notificationModel');
+              await Notification.create({
+                recipient: blogAuthorId,
+                type: 'like',
+                message: `${actorUser?.name || 'Someone'} liked your blog`,
+                actor: {
+                  id: actorUser?._id,
+                  name: actorUser?.name,
+                  avatar: actorUser?.avatar,
+                },
+                targetBlog: { id: blog._id.toString(), title: blog.title },
+              });
+            } catch (err) {
+              // Notification model might not exist or other DB error
+            }
+
+            global.broadcastEvent('notification:new', {
+              type: 'like',
+              message: `${actorUser?.name || 'Someone'} liked your blog`,
+              actor: {
+                id: actorUser?._id,
+                name: actorUser?.name,
+                avatar: actorUser?.avatar,
+              },
+              targetBlog: { id: blog._id.toString(), title: blog.title },
+              recipientId: blogAuthorId,
+              timestamp: new Date().toISOString(),
+            });
+          }
+        } catch (e) {
+          console.error('Error sending like notification:', e);
+        }
       }
 
       return res.status(200).json({
