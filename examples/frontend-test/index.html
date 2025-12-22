@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Backend Auth/CORS Test Page</title>
+  <style>
+    body { font-family: system-ui, Arial; max-width: 900px; margin: 2rem auto; }
+    input, textarea, button { font-size: 1rem; padding: .5rem; margin: .25rem 0; width:100%; }
+    .row { display:flex; gap:.5rem; }
+    .col { flex:1 }
+    pre { background:#111; color:#0f0; padding:1rem; overflow:auto }
+  </style>
+</head>
+<body>
+  <h1>Backend Auth & CORS Test</h1>
+  <p>Use this page to test login, cookie-based requests (credentials: 'include'), Authorization header requests, and SSE subscription.</p>
+
+  <label>API Base URL (e.g. http://localhost:5000 or https://api.example.com)</label>
+  <input id="apiBase" value="http://localhost:5000" />
+
+  <h2>Login</h2>
+  <input id="email" placeholder="Email" value="testuser+local@example.com" />
+  <input id="password" placeholder="Password" value="Password123" type="password" />
+  <div class="row">
+    <button id="btnLoginCookie" class="col">Login (set HttpOnly cookie + return token)</button>
+    <button id="btnLoginNoCookie" class="col">Login (no cookie)</button>
+  </div>
+
+  <h3>Token (from response)</h3>
+  <textarea id="token" rows="2" placeholder="JWT token will appear here"></textarea>
+
+  <h2>Protected /api/users/me</h2>
+  <div class="row">
+    <button id="btnMeCookie" class="col">GET /api/users/me (cookie)</button>
+    <button id="btnMeHeader" class="col">GET /api/users/me (Authorization)</button>
+  </div>
+
+  <h2>Create Blog</h2>
+  <input id="postTitle" placeholder="Title" value="Test post from demo" />
+  <textarea id="postContent" rows="3">Hello from demo</textarea>
+  <div class="row">
+    <button id="btnCreateCookie" class="col">Create (cookie)</button>
+    <button id="btnCreateHeader" class="col">Create (header)</button>
+  </div>
+
+  <h2>Server-Sent Events (SSE)</h2>
+  <label>SSE URL (leave blank to use API base + /api/events/stream)</label>
+  <input id="sseUrl" placeholder="SSE URL (optional)" />
+  <div class="row">
+    <button id="btnSseConnect" class="col">Connect SSE</button>
+    <button id="btnSseDisconnect" class="col">Disconnect SSE</button>
+  </div>
+
+  <h2>Output</h2>
+  <pre id="out">Ready.</pre>
+
+<script>
+(function(){
+  const out = (msg) => { const el = document.getElementById('out'); el.textContent = new Date().toISOString() + ' - ' + msg + '\n' + el.textContent; };
+  const apiBaseEl = document.getElementById('apiBase');
+  const tokenEl = document.getElementById('token');
+
+  async function login(sendCookie=true){
+    const url = (apiBaseEl.value.replace(/\/$/, '')) + '/api/users/login';
+    const body = { email: document.getElementById('email').value, password: document.getElementById('password').value };
+    const opts = {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    };
+    if (sendCookie) opts.credentials = 'include';
+    const res = await fetch(url, opts);
+    const data = await res.json().catch(()=>null);
+    out('Login response: ' + res.status + ' ' + JSON.stringify(data));
+    if (data && data.data && data.data.token) tokenEl.value = data.data.token;
+    return data;
+  }
+
+  async function getMe(useCookie=true){
+    const url = (apiBaseEl.value.replace(/\/$/, '')) + '/api/users/me';
+    const opts = { method: 'GET' };
+    if (useCookie) opts.credentials = 'include'; else opts.headers = { 'Authorization': 'Bearer ' + tokenEl.value };
+    const res = await fetch(url, opts);
+    const data = await res.json().catch(()=>null);
+    out('/api/users/me response: ' + res.status + ' ' + JSON.stringify(data));
+    return data;
+  }
+
+  async function createBlog(useCookie=true){
+    const url = (apiBaseEl.value.replace(/\/$/, '')) + '/api/blogs/create';
+    const body = { title: document.getElementById('postTitle').value, content: document.getElementById('postContent').value, tags: ['demo'] };
+    const opts = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
+    if (useCookie) opts.credentials = 'include'; else opts.headers['Authorization'] = 'Bearer ' + tokenEl.value;
+    const res = await fetch(url, opts);
+    const data = await res.json().catch(()=>null);
+    out('/api/blogs/create response: ' + res.status + ' ' + JSON.stringify(data));
+    return data;
+  }
+
+  let es = null;
+  function connectSSE(){
+    const urlInput = document.getElementById('sseUrl').value.trim();
+    const base = apiBaseEl.value.replace(/\/$/, '');
+    const url = urlInput || (base + '/api/events/stream');
+    out('Connecting to SSE: ' + url);
+
+    try{
+      es = new EventSource(url);
+      es.onopen = () => out('SSE: open');
+      es.onmessage = (e)=>{
+        out('SSE message: ' + e.data);
+      };
+      es.onerror = (e)=>{
+        out('SSE error');
+      };
+    } catch(e){ out('SSE start failed: ' + e.message); }
+  }
+  function disconnectSSE(){ if (es){ es.close(); es = null; out('SSE disconnected'); } else out('SSE was not connected'); }
+
+  document.getElementById('btnLoginCookie').addEventListener('click', ()=>login(true));
+  document.getElementById('btnLoginNoCookie').addEventListener('click', ()=>login(false));
+  document.getElementById('btnMeCookie').addEventListener('click', ()=>getMe(true));
+  document.getElementById('btnMeHeader').addEventListener('click', ()=>getMe(false));
+  document.getElementById('btnCreateCookie').addEventListener('click', ()=>createBlog(true));
+  document.getElementById('btnCreateHeader').addEventListener('click', ()=>createBlog(false));
+  document.getElementById('btnSseConnect').addEventListener('click', connectSSE);
+  document.getElementById('btnSseDisconnect').addEventListener('click', disconnectSSE);
+
+  out('Test page ready.');
+})();
+</script>
+</body>
+</html>
