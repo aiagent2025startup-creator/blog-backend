@@ -20,8 +20,11 @@ const app = express();
 // Allow configuring CORS via CORS_ORIGIN or FRONTEND_URL (fallback to localhost 8080)
 // Support comma-separated values so multiple frontend origins can be allowed.
 // CORS_ORIGIN may be a comma-separated list. Normalize by trimming and removing trailing slashes.
-const rawOrigins = (process.env.CORS_ORIGIN || process.env.FRONTEND_URL || 'http://localhost:8080,https://blog-frontned-9v3r.vercel.app');
-const ALLOWED_ORIGINS = rawOrigins.split(',').map(s => s.trim().replace(/\/$/, '')).filter(Boolean);
+// Combine env vars and hardcoded values to ensure we never lock ourselves out
+const envOrigins = (process.env.CORS_ORIGIN || process.env.FRONTEND_URL || '').split(',');
+const defaultOrigins = ['http://localhost:8080', 'https://blog-frontned-9v3r.vercel.app', 'https://chronicle-flow.vercel.app'];
+const allOrigins = [...envOrigins, ...defaultOrigins];
+const ALLOWED_ORIGINS = [...new Set(allOrigins.map(s => s.trim().replace(/\/$/, '')).filter(Boolean))];
 
 // Use a dynamic origin checker to avoid subtle mismatches (e.g., trailing slash).
 app.use(cors({

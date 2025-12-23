@@ -27,4 +27,4 @@ services:
       - key: FRONTEND_URL
         value: https://chronicle-flow.vercel.app
       - key: CORS_ORIGIN
-        value: https://chronicle-flow.vercel.app
+        value: https://chronicle-flow.vercel.app,https://blog-frontned-9v3r.vercel.app
