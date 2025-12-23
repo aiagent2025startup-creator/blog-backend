@@ -20,7 +20,7 @@ const app = express();
 // Allow configuring CORS via CORS_ORIGIN or FRONTEND_URL (fallback to localhost 8080)
 // Support comma-separated values so multiple frontend origins can be allowed.
 // CORS_ORIGIN may be a comma-separated list. Normalize by trimming and removing trailing slashes.
-const rawOrigins = (process.env.CORS_ORIGIN || process.env.FRONTEND_URL || 'http://localhost:8080');
+const rawOrigins = (process.env.CORS_ORIGIN || process.env.FRONTEND_URL || 'http://localhost:8080,https://blog-frontned-9v3r.vercel.app');
 const ALLOWED_ORIGINS = rawOrigins.split(',').map(s => s.trim().replace(/\/$/, '')).filter(Boolean);
 
 // Use a dynamic origin checker to avoid subtle mismatches (e.g., trailing slash).
@@ -129,12 +129,25 @@ app.get('/api/events/stream', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
   // For SSE connections we must echo back the request's origin when it's allowed.
+  // For SSE connections we must echo back the request's origin when it's allowed.
   const reqOrigin = (req.headers.origin || '').replace(/\/$/, '');
+
+  // Check if origin is allowed
   if (ALLOWED_ORIGINS.includes(reqOrigin)) {
     res.setHeader('Access-Control-Allow-Origin', reqOrigin);
   } else {
-    // Fallback to first allowed origin (safe default) — this avoids accidental trailing slash mismatches
-    res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGINS[0]);
+    // If not in the strict list, check if it matches the known frontend URL directly
+    // This is a fallback fix for the reported issue where env vars might be missing the new URL
+    const knownFrontend = 'https://blog-frontned-9v3r.vercel.app';
+    if (reqOrigin === knownFrontend) {
+      res.setHeader('Access-Control-Allow-Origin', reqOrigin);
+    } else {
+      // Fallback to first allowed origin or '*' if none (though credentials mode disallows *)
+      // We use the first allowed origin as a safe default if available, otherwise the request origin itself if we want to be permissive (risky)
+      // or just fail. Here we try to be safe but avoid crashing if ALLOWED_ORIGINS is empty.
+      const defaultOrigin = ALLOWED_ORIGINS[0] || 'http://localhost:8080';
+      res.setHeader('Access-Control-Allow-Origin', defaultOrigin);
+    }
   }
   res.setHeader('Access-Control-Allow-Credentials', 'true');
 
@@ -260,7 +273,7 @@ app.use((err, req, res, next) => {
       error: err.message,
     });
   }
-  
+
   console.error('Server error:', err);
   res.status(500).json({
     success: false,
