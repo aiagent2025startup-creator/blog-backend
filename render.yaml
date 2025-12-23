@@ -28,3 +28,5 @@ services:
         value: https://chronicle-flow.vercel.app
       - key: CORS_ORIGIN
         value: https://chronicle-flow.vercel.app,https://blog-frontned-9v3r.vercel.app
+      - key: REALTIME_PUBLIC_URL
+        value: https://blog-backend-e4j1.onrender.com
